@@ -1,0 +1,171 @@
+@charset "utf-8";
+
+/*统一设置*/
+* {
+	margin: 0;
+	padding: 0;
+}
+body {
+	font-family: "微软雅黑";
+}
+a {
+	color: #000;
+	text-decoration: none;
+}
+ul,li {
+	list-style: none;
+}
+
+/*网页头部*/
+#header {
+	width: 960px;
+	height: 70px;
+	margin: 0 auto;
+}
+
+/*主导航栏*/
+#nav {
+	min-width: 960px;
+	height: 50px;
+	line-height: 50px;
+	background: #47a3da;
+}
+#nav ul {
+	width: 960px;
+	margin: 0 auto;
+	overflow: hidden;/*或者height: 50px;  解决塌陷问题*/
+}
+#nav ul li {
+	float: left;
+	width: 160px;
+	text-align: center;
+}
+#nav ul li a {
+	color: #fff;
+	font-size: 18px;
+	font-weight: 500px;
+	letter-spacing: 3px;/*文字间距*/
+	display: block;/*把a变成块级元素,下面的:hover才有高度宽度*/
+}
+#nav ul li a:hover {
+	background: #e6f2fa;
+	color: #47A3DA;
+}
+/*高亮导航，需要在html中添加上应用：class="active"*/
+.active {
+	background: #0068b7;
+}
+/*主内容区*/
+#main {
+	width: 960px;
+	min-height: 400px;
+	margin: 0 auto;
+	padding: 10px;
+	overflow: hidden;/*防止底部上窜,内容塌陷*/
+}
+/*左侧边栏*/
+#aside {
+	width: 220px;
+	min-height: 400px;
+	float: left;
+}
+/*列表*/
+#list h3 {
+	color: #fff;
+	background: #47A3DA;
+	font-size: 16px;
+	text-align: center;
+	line-height: 35px;
+	font-weight: normal;/*不加粗*/
+}
+#list ul li {
+	border-bottom: 1px dashed #000;
+}
+#list ul li a {
+	color: #666;
+	line-height: 40px;
+	font-size: 14px;
+	text-align: center;
+	display: block;
+}
+#list ul li a:hover {
+	background: #47A3DA;
+	color: #FFFFFF;
+}
+/*全国鼓舞支持*/
+#address {
+	background: #eee;
+	margin-top: 30px;
+	padding: 10px;
+	text-align: center;
+}
+#address h3 {
+	font-size: 16px;
+	line-height: 30px;
+	border-bottom: 1px solid green;
+}
+#adress ul li {
+	font-size: 14px;
+	line-height: 30px;
+}
+.icon-tel {
+	position: relative;
+	top: 2px;
+	left: -2px;
+}
+.icon-msg {
+	position: relative;
+	top: 3px;
+	left: -3px;
+}
+/*内容区*/
+#contents {
+	width: 720px;
+	min-height: 400px;
+	float: right;
+	font-size: 14px;
+}
+#contents h4 {
+	font-weight: 300px;
+	line-height: 40px;
+	border-bottom: 3px solid #47A3DA;
+}
+#contents #sub-banner {
+	padding: 5px 0;
+}
+/*文章区*/
+#wenzhang {
+	border-top: 3px solid #47A3DA;
+}
+#wenzhang h1 {
+	text-align: center;
+	line-height: 60px;
+}
+#wenzhang p {
+	line-height: 25px;
+	padding: 10px 0;
+	text-indent: 28px;/*首行缩进：一个字相当于14像素,1个em*/
+}
+/*底部*/
+#footer {
+	height: 150px;
+	background: #4b4b4b;
+	color: #FFFFFF;
+	padding: 10px;
+	font-size: 14px;
+}
+#footer .wrap {
+	width: 960px;
+	margin: 0 auto;
+}
+#footer .wrap dl {
+	width: 320px;
+	float: left;
+}
+#footer .wrap dl dt {
+	font-weight: bold;
+	line-height: 20px;
+}
+#footer .wrap dl dd {
+	line-height: 20px;
+}
