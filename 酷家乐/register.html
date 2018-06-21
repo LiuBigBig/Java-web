@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" type="text/css" href="css/register-login.css">
+	<script type="text/javascript" src="js/jquery.js"></script>
+	<script type="text/javascript" src="js/register.js"></script>
+</head>
+<body>
+	<div id="register">
+		<!-- logo -->
+		<div class="logo">
+			<a href="index.html">
+				<img src="images/logo.png">
+			</a>
+		</div>
+		<!-- 注册界面 -->
+		<div class="reg_login_panel">
+
+			<div class="user">
+				<div id="personal-user" class="user-style user_showborder">个人用户</div>
+				<div id="enterprise-user" class="user-style">企业用户</div>
+			</div>
+
+			<form id="" method="post" action="">
+				<div class="user-name">
+
+					我是：
+					<span class="personal">
+						<input type="radio" name="user-name_item" id="user1"> 业主
+					</span>
+					<span class="personal">
+						<input type="radio" name="user-name_item" id="user2"> 设计师
+					</span>
+					<span class="enterprise">
+						<input type="radio" name="user-name_item" id="user3"> 装修公司
+					</span>
+					<span class="enterprise">
+						<input type="radio" name="user-name_item" id="user4"> 品牌商
+					</span>
+					<span class="enterprise">
+						<input type="radio" name="user-name_item" id="user5"> 经销商
+					</span>
+					<span class="enterprise">
+						<input type="radio" name="user-name_item" id="user6"> 工长
+					</span>
+					
+				</div>
+				
+				<div class="input_container">
+					<input type="text" class="reg_login-input" id="register-name" placeholder="邮箱账号">
+					<ul>
+						
+					</ul>
+				</div>
+				<div class="input_container">
+					<input type="password" class="reg_login-input" id="register-pwd" placeholder="密码">
+				</div>
+				<div class="input_container">
+					<input type="text" class="reg_login-input" id="random-letter-input" placeholder="验证码">
+					<div id="random-letter" class="reg_login-input">
+						<div>
+							<span></span>
+							
+						</div>
+						<a class="icon icon-redo2"></a>
+					</div> 
+				</div>
+				
+				
+
+				<div class="confirm" id="protocal">
+					<input type="checkbox" checked> 已阅读并同意协议
+				</div>
+
+				<input type="button" id="submit-register" value="注册">
+
+				<div class="reg_login-btn">
+					已有账号？<a href="login.html">立即登录</a>
+				</div>
+			</form>
+			
+			
+		</div>
+
+	</div>
+
+	
+	
+</body>
+</html>

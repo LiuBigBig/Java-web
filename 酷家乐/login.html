@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" type="text/css" href="css/register-login.css">
+	<script type="text/javascript" src="js/jquery.js"></script>
+</head>
+<body>
+	<div id="login">
+		<!-- logo -->
+		<div class="logo">
+			<a href="index.html">
+				<img src="images/logo.png">
+			</a>
+		</div>
+		<!-- 注册界面 -->
+		<div class="reg_login_panel">
+
+			<h3 class="denglu">登录</h3>
+			
+			<div class="input_container">
+				<input type="text" class="reg_login-input" id="login-name" placeholder="请输入登录手机号/邮箱">
+			</div>
+			<div class="input_contaienr">
+				<input type="password" class="reg_login-input" id="login-pwd" placeholder="请输入密码">
+			</div>
+
+			<div class="confirm" id="remeber">
+				<input type="checkbox"> 记住我
+				<div class="remeber_msg">为了您的信息安全，请不要在网吧或公用电脑上使用此功能！</div>
+			</div>
+
+			<input type="button" id="submit-login" value="登录">
+
+			<div class="reg_login-btn" id="login">
+				没有账号？<a href="register.html">立即注册</a>
+			</div>
+		</div>
+
+	</div>
+
+	<script type="text/javascript">
+		$(document).ready(function(){
+			
+			// 动态控制登陆面板大小
+			var w = $(window).width();
+			$("#login").width(w);
+
+			$(window).resize(function(event) {
+				var w = $(window).width();
+				$("#login").width(w);
+			});
+			
+			
+			// 勾选记住我选项，提示安全信息
+			$("#remeber input").click(function(event) {
+				if($(this).prop("checked")){
+					$(".remeber_msg").fadeIn("slow");
+					setTimeout(function(){
+						$(".remeber_msg").fadeOut("slow");
+					},2500);
+					// 如果登录时选中记住我，则记录此次登录的用户名
+					localStorage.setItem("remember",$("#login-name").val());
+					
+				}else{
+					// 取消记住我选项，删除localstorage中的remember
+					localStorage.removeItem("remember");
+				}
+			});
+			
+			// 如果localstorage中存在remember，则自动显示用户名和密码，记住我仍为选中状态
+			if(localStorage.getItem("remember")){
+
+				$("#remeber input").attr("checked",true);
+
+				// 取出remember中存储的用户名
+				$("#login-name").val(localStorage.getItem("remember"));
+
+				// 取出对应用户名的密码
+				$("#login-pwd").val(JSON.parse(localStorage.getItem(localStorage.getItem("remember"))).userPwd);
+			}
+
+			// 点击登录按钮，验证用户名和密码
+			$("#submit-login").click(function(event){
+				var username = $("#login-name").val();
+				var password = $("#login-pwd").val();
+				if(!localStorage.getItem(username)){
+					alert("请输入正确的用户名和密码！");
+					return;
+				}else{
+					if(password == JSON.parse(localStorage.getItem(username)).userPwd){
+						alert("登录成功");
+						location.href = "index.html";
+					}
+					else{
+						alert("用户名或密码不正确");
+					}
+				}
+					
+				
+			});
+			
+		});
+	</script>
+	
+</body>
+</html>

@@ -1,0 +1,217 @@
+/*注册界面*/
+*{
+	margin: 0px;
+	padding: 0px;
+}
+body{
+	overflow: hidden;
+	background: url(../images/register-bg.jpg) no-repeat;
+	font-family: "Microsoft YaHei","微软雅黑";
+	/*background-size: cover;*/
+}
+a{
+	text-decoration: none;
+}
+#register,#login{
+	width: 100%;
+}
+.logo{
+	position: absolute;
+	left: 20px;
+	top: 20px;
+}
+.reg_login_panel{
+	padding: 40px 65px;
+	margin: 100px auto;
+	background: #fff;
+	width: 360px;
+	position: relative;
+}
+.user{
+	border-bottom: 1px solid #ccc;
+	overflow: hidden;
+	/*height: 18px;*/
+}
+.user div{
+	float: left;
+}
+.user-style{
+	font-size: 18px;
+	line-height: 30px;
+	padding: 0px 30px;
+	cursor: pointer;
+}
+.user_showborder{
+	/*margin-bottom: -2px;*/
+	border-bottom: 2px solid #37B5F9;
+}
+
+.user-name{
+	padding: 20px 0px;
+	font-size: 14px;
+	line-height: 14px;
+}
+.user-name span{
+	padding-right: 15px;
+	vertical-align: top;
+}
+.user-name span input{
+	vertical-align: top;
+	width: 14px;
+	height: 14px;
+}
+/*不正确时的提示信息格式*/
+.msg{
+	font-size: 12px;
+	line-height: 16px;
+	color: #f26d7e;
+	background: url(../images/attention.png) no-repeat left;
+	padding-left: 20px;
+	clear:both;
+}
+.enterprise{
+	display: none;
+}
+.input_container{
+	width: 362px;
+	height: 46px;
+	padding: 10px 0px;
+	/*margin: 20px 0px;*/
+}
+.reg_login-input{
+	display: block;
+	width: 310px;
+	height: 24px;
+	padding: 10px;
+	padding-left: 40px;
+	font-size: 13px;
+	outline: none;
+	border:1px solid #ccc;
+	background: url(../images/KYFFYCYKAEBKMJV3A4888888_16x200.png) no-repeat left;
+}
+#register-name,#login-name{
+	background-position: 12px 12px;
+}
+#register-pwd,#login-pwd{
+	background-position: 12px -28px;
+}
+#random-letter-input{
+	background-position: 12px -68px;
+	width: 190px;
+	float: left;
+}
+#random-letter{
+	width: 97px;
+	padding-left: 10px;
+	background: #fff;
+	float: left;
+	border-left: none;
+	position: relative;
+}
+#random-letter div{
+	display: inline;
+	font-size: 18px;
+	letter-spacing: 2px;
+	color: #37B5F9;
+	width: 97px;
+}
+#random-letter div span{
+	-webkit-user-select:none; 
+	-moz-user-select:none; 
+	-ms-user-select:none; 
+	user-select:none;
+}
+#random-letter a{
+	position: absolute;
+	right: 5px;
+	top: 15px;
+	font-size: 16px;
+	color: #999;
+	font-size: 18px!important;
+}
+#random-letter a:hover{
+	color: #b5b5b5;
+}
+@font-face {
+	font-family: "icomoon";
+	src: url("../fonts/icomoon.eot"); /* IE9 兼容模式 */
+	src: url("../fonts/icomoon.eot?#iefix") format("embedded-opentype"), url("../fonts/icomoon.woff") format("woff"), url("../fonts/icomoon.ttf") format("truetype"), url("../fonts/icomoon.svg") format("svg");
+	font-weight: normal;
+	font-style: normal;
+}
+
+/*应用字体*/
+.icon {
+	font-family: "icomoon";	/* 谷歌和火狐特有属性，防字体锯齿 平滑显示*/
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+/*预设字体图标样式，用content输出16进制实体字符前面加\ 例如\e600*/
+
+.icon-redo2:before {
+	content: "\e668";
+	cursor: pointer;
+}
+
+.confirm{
+	font-size: 14px;
+	vertical-align: middle;
+	line-height: 14px;
+	padding: 10px 0px;
+}
+.confirm input{
+	width: 14px;
+	height: 14px;
+	vertical-align: top;
+}
+.confirm .remeber_msg{
+	display: none;
+	width: 200px;
+	height: 40px;
+	padding: 20px 10px;
+	background: rgba(0,0,0,0.5);
+	color: #fff;
+	font-size: 12px;
+	line-height: 20px;
+	text-align: center;
+	position: absolute;
+	left: 30%;
+	top: 40%;
+}
+
+#submit-register,#submit-login{
+	display: block;
+	width: 360px;
+	background:#37B5F9;
+	color: #fff;
+	font-size: 19px;
+	font-weight: 500;
+	text-align: center;
+	height: 40px;
+	line-height: 40px;
+	margin: 10px 0px;
+	border: none;
+	cursor: pointer;
+}
+
+.reg_login-btn{
+	width: 360px;
+	text-align: right;
+	color: #999;
+}
+.reg_login-btn a{
+	color: #35b5f9;
+}
+.reg_login-btn a:hover{
+	text-decoration: underline;
+}
+/*注册界面*/
+
+.denglu{
+	font-size: 24px;
+	font-weight: normal;
+	color: #37B5F9;
+	height: 50px;
+	line-height: 50px;
+}
