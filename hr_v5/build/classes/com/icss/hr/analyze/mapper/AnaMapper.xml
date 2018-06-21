@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.icss.hr.analyze.dao.AnaMapper">
+
+	<resultMap type="com.icss.hr.analyze.dto.DeptEmpCount" id="BaseResultMap">
+		<result column="DEPT_NAME" property="deptName" jdbcType="VARCHAR"/>
+		<result column="EMP_COUNT" property="empCount" jdbcType="DECIMAL"/>
+	</resultMap>
+	
+	<resultMap type="com.icss.hr.analyze.dto.DeptSal" id="BaseResultMap2">
+		<result column="DEPT_NAME" property="deptName" jdbcType="VARCHAR"/>
+		<result column="MIN_SAL" property="jobMinSal" jdbcType="DECIMAL"/>
+		<result column="MAX_SAL" property="jobMaxSal" jdbcType="DECIMAL"/>
+	</resultMap>
+
+	<select id="queryEmpCount" resultMap="BaseResultMap">
+		select d.dept_name,count(e.emp_id) emp_count
+		from dept d
+		left outer join emp e on d.dept_id=e.emp_dept_id
+		group by d.dept_name
+	</select>	
+	
+	<select id="queryJobAvgSal" resultType="java.util.Map">
+		SELECT j.job_name `jobName`, TRUNCATE(IFNULL(AVG(e.emp_salary),0),2) `avgSal` 
+		FROM  job j		
+		LEFT OUTER JOIN emp e ON j.job_id=e.emp_job_id
+		GROUP BY j.job_name
+	</select>
+	
+	<select id="queryDeptSal" resultMap="BaseResultMap2">
+		SELECT  d.dept_name dept_name,MAX(e.emp_salary) max_sal,MIN(e.emp_salary) min_sal
+		FROM dept d
+		LEFT OUTER JOIN emp e ON d.dept_id = e.emp_dept_id
+		GROUP BY d.dept_name
+	</select>
+
+</mapper>

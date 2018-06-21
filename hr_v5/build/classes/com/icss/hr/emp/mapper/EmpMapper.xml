@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.icss.hr.emp.dao.EmpMapper">
+
+	<resultMap id="BaseResultMap" type="com.icss.hr.emp.pojo.Emp">
+		<id column="EMP_ID" property="empId" jdbcType="DECIMAL" />
+		<result column="EMP_NAME" property="empName" jdbcType="VARCHAR" />
+		<result column="EMP_LOGIN_NAME" property="empLoginName"
+			jdbcType="VARCHAR" />
+		<result column="EMP_PWD" property="empPwd" jdbcType="VARCHAR" />
+		<result column="EMP_EMAIL" property="empEmail" jdbcType="VARCHAR" />
+		<result column="EMP_PHONE" property="empPhone" jdbcType="VARCHAR" />
+		<result column="EMP_HIREDATE" property="empHiredate" jdbcType="DATE" />
+		<result column="EMP_SALARY" property="empSalary" jdbcType="DECIMAL" />
+		<result column="EMP_INFO" property="empInfo" jdbcType="VARCHAR" />
+		<!-- 多对一关联部门 -->
+		<association property="dept" javaType="com.icss.hr.dept.pojo.Dept">
+			<id column="DEPT_ID" property="deptId" jdbcType="DECIMAL" />
+			<result column="DEPT_NAME" property="deptName" jdbcType="VARCHAR" />
+			<result column="DEPT_LOC" property="deptLoc" jdbcType="VARCHAR" />
+		</association>
+		<!-- 多对一关联职务 -->
+		<association property="job" javaType="com.icss.hr.job.pojo.Job">
+			<id column="JOB_ID" property="jobId" jdbcType="DECIMAL" />
+			<result column="JOB_NAME" property="jobName" jdbcType="VARCHAR" />
+			<result column="JOB_MIN_SAL" property="jobMinSal" jdbcType="DECIMAL" />
+			<result column="JOB_MAX_SAL" property="jobMaxSal" jdbcType="DECIMAL" />
+		</association>
+	</resultMap>	
+
+	<insert id="insert" parameterType="com.icss.hr.emp.pojo.Emp">
+		insert into EMP (EMP_ID,
+		EMP_NAME, EMP_LOGIN_NAME,
+		EMP_PWD, EMP_EMAIL, EMP_PHONE,
+		EMP_HIREDATE,
+		EMP_SALARY, EMP_DEPT_ID,
+		EMP_JOB_ID, EMP_INFO, EMP_PIC
+		)
+		values
+		(default, #{empName,jdbcType=VARCHAR},
+		#{empLoginName,jdbcType=VARCHAR},
+		#{empPwd,jdbcType=VARCHAR},
+		#{empEmail,jdbcType=VARCHAR}, #{empPhone,jdbcType=VARCHAR},
+		#{empHiredate,jdbcType=TIMESTAMP}, #{empSalary,jdbcType=DECIMAL},
+		#{dept.deptId,jdbcType=DECIMAL},
+		#{job.jobId,jdbcType=DECIMAL},
+		#{empInfo,jdbcType=VARCHAR}, #{empPic,jdbcType=CLOB}
+		)
+	</insert>
+
+	<update id="update" parameterType="com.icss.hr.emp.pojo.Emp">
+		update EMP
+		set
+		EMP_PHONE = #{empPhone,jdbcType=VARCHAR},
+		EMP_HIREDATE =
+		#{empHiredate,jdbcType=TIMESTAMP},
+		EMP_SALARY =
+		#{empSalary,jdbcType=DECIMAL},
+		EMP_DEPT_ID =
+		#{dept.deptId,jdbcType=DECIMAL},
+		EMP_JOB_ID =
+		#{job.jobId,jdbcType=DECIMAL},
+		EMP_INFO = #{empInfo,jdbcType=VARCHAR}
+		where EMP_ID = #{empId,jdbcType=DECIMAL}
+	</update>
+
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from EMP
+		where EMP_ID = #{empId,jdbcType=DECIMAL}
+	</delete>
+	
+	<select id="queryById" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+		select e.*,d.*,j.*
+		from emp e
+		left outer join dept d on e.emp_dept_id=d.dept_id
+		left outer join job j on e.emp_job_id=j.job_id
+		where emp_id=#{empId,jdbcType=DECIMAL}		
+	</select>
+	
+	<select id="queryByPage" parameterType="com.icss.hr.common.Pager" resultMap="BaseResultMap">
+		SELECT e.*,
+		       d.*,
+		       j.*
+		FROM   emp e
+		LEFT   OUTER JOIN dept d ON e.emp_dept_id = d.dept_id
+		LEFT   OUTER JOIN job j ON e.emp_job_id = j.job_id
+		LIMIT #{start},#{pageSize}
+	</select>
+	
+	<select id="getCount" resultType="java.lang.Integer">
+		select count(*) from emp
+	</select>
+	
+	<select id="queryByName" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select emp_pwd from emp where emp_login_name=#{empLoginName}
+	</select>
+	
+	<select id="queryEmpPic" parameterType="java.lang.String" resultType="java.lang.String">
+		select emp_pic from emp where emp_login_name=#{empLoginName}
+	</select>
+	
+	<update id="updateEmpPic">
+		update emp set emp_pic=#{empPic} where emp_login_name=#{empLoginName} 
+	</update>
+	
+	<update id="updateEmpPwd">
+		update emp set emp_pwd=#{empPwd} where emp_login_name=#{empLoginName}
+	</update>
+	
+	<!-- 条件分页 -->
+	<select id="queryByCondition" resultMap="BaseResultMap">
+		SELECT e.*,
+		       d.*,
+		       j.*
+		FROM   emp e
+		LEFT   OUTER JOIN dept d ON e.emp_dept_id = d.dept_id
+		LEFT   OUTER JOIN job j ON e.emp_job_id = j.job_id
+		<where>
+			<if test="deptId != null">
+				and d.dept_id=#{deptId}
+			</if>
+			<if test="jobId != null">
+				and j.job_id=#{jobId}
+			</if>
+			<if test="empName != null and empName != '' ">
+				and LOCATE(#{empName},e.emp_name)>0
+			</if>
+		</where>		
+		LIMIT #{pager.start},#{pager.pageSize}
+	</select>
+	
+	<!-- 条件返回总记录数 -->
+	<select id="getCountByCondition" resultType="java.lang.Integer">
+		select count(*) from emp
+		<where>
+			<if test="deptId != null">
+				and emp_dept_id=#{deptId}
+			</if>
+			<if test="jobId != null">
+				and emp_job_id=#{jobId}
+			</if>
+			<if test="empName != null and empName != '' ">
+				and LOCATE(#{empName},emp_name)>0
+			</if>
+		</where>
+	</select>
+	
+	<!-- 获得最后生成自增编号 -->
+	<select id="getLastInsertId" resultType="java.lang.Integer">
+		SELECT LAST_INSERT_ID()
+	</select>
+	
+	<!-- 查询所有今天过生日的员工 -->
+	<select id="queryByHiredate" resultMap="BaseResultMap">
+		SELECT * 
+		FROM emp 
+		WHERE DATE_FORMAT(emp_hiredate, '%m-%d') = DATE_FORMAT(NOW(), '%m-%d')
+	</select>
+	
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.icss.hr.pic.dao.PicMapper">
+
+	<resultMap id="BaseResultMap" type="com.icss.hr.pic.pojo.Pic">
+		<id column="PIC_ID" property="picId" jdbcType="DECIMAL" />
+		<result column="PIC_NAME" property="picName" jdbcType="VARCHAR" />
+		<result column="PIC_INFO" property="picInfo" jdbcType="VARCHAR" />
+		<result column="PIC_SIZE" property="picSize" jdbcType="DECIMAL" />
+		<result column="PIC_AUTHOR" property="picAuthor" jdbcType="VARCHAR" />
+		<result column="PIC_DATETIME" property="picDatetime" jdbcType="TIMESTAMP" />
+	</resultMap>
+
+	<resultMap id="ResultMapWithBLOBs" type="com.icss.hr.pic.pojo.Pic"
+		extends="BaseResultMap">
+		<result column="PIC_DATA" property="picData" jdbcType="BLOB" />
+	</resultMap>
+
+	<insert id="insert" parameterType="com.icss.hr.pic.pojo.Pic">
+		insert into PIC (PIC_ID, PIC_NAME, PIC_INFO,
+		PIC_SIZE, PIC_AUTHOR, PIC_DATETIME,
+		PIC_DATA)
+		values (default, #{picName,jdbcType=VARCHAR},
+		#{picInfo,jdbcType=VARCHAR},
+		#{picSize,jdbcType=DECIMAL}, #{picAuthor,jdbcType=VARCHAR}, #{picDatetime,jdbcType=TIMESTAMP},
+		#{picData,jdbcType=BLOB})
+	</insert>
+	
+	<select id="queryByPage" parameterType="com.icss.hr.common.Pager" resultMap="BaseResultMap">
+		SELECT *
+		FROM   pic
+		ORDER  BY pic_datetime DESC
+		LIMIT #{start},#{pageSize}
+	</select>
+	
+	<select id="getCount" resultType="java.lang.Integer">
+		select count(*) from pic
+	</select>
+	
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from pic where pic_id=#{picId,jdbcType=DECIMAL}
+	</delete>
+	
+	<select id="queryById" parameterType="java.lang.Integer" resultMap="ResultMapWithBLOBs">
+		select * from pic where pic_id=#{picId,jdbcType=DECIMAL}
+	</select>
+	
+</mapper>

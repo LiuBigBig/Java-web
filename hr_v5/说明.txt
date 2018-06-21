@@ -1,0 +1,6 @@
+采用前后端分离式开发,前端使用了jquery,vuejs,layer,bootstrap,echarts图表，swiper轮播，瀑布流布局，头像裁剪，日历控件
+后端采用SSM三大框架，JSP,c3p0数据库连接池
+使用MYSQL数据库，增加了员工条件检索功能和Lucene全文检索
+使用Shiro安全框架进行登陆认证以及权限拦截
+使用Quartz定时检查员工入职日期发送电子邮件
+使用POI导出员工数据到excel

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:oxm="http://www.springframework.org/schema/oxm"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.2.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+		http://www.springframework.org/schema/oxm http://www.springframework.org/schema/oxm/spring-oxm-3.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd">
+	
+	<!-- 引入资源用于在java代码中注入资源文件的值 -->
+	<bean id="prop" class="org.springframework.beans.factory.config.PropertiesFactoryBean">  
+	    <property name="locations"> 
+	        <array>  
+	            <value>classpath:db_config.properties</value>  
+	        </array>  
+	    </property>  
+	</bean>
+	
+	<!-- 加载属性文件 -->
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+		lazy-init="false">
+		<property name="locations">
+			<list>
+				<value>classpath*:db_config.properties</value>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- 扫描所有注解 -->
+	<context:component-scan base-package="com.icss.hr">
+		<!-- 仅不扫描@Controller注解组件 -->
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+	</context:component-scan>
+	
+	<!-- 配置数据源 c3p0连接池 -->
+	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+		<property name="driverClass" value="${driver}" />
+		<property name="jdbcUrl" value="${url}" />
+		<property name="user" value="${user}" />
+		<property name="password" value="${password}" />
+		<property name="maxPoolSize" value="30" />
+		<property name="minPoolSize" value="10" />
+		<property name="initialPoolSize" value="10" />
+		<property name="acquireIncrement" value="2" />  <!-- 两分钟扫描一次 -->
+	</bean>
+	
+	<!-- sessionFactory 将spring和mybatis整合 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:mybatis-config.xml" />
+		<!-- 自动扫描mapping.xml文件 -->
+		<property name="mapperLocations" value="classpath:com/icss/hr/*/mapper/*.xml"/>
+	</bean>
+	
+	<!-- DAO接口扫描 -->
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!-- 扫描包路径，如果需要扫描多个包中间用半角逗号隔开 -->
+		<property name="basePackage" value="com.icss.hr.*.dao" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	</bean>
+	
+	<!-- 事务管理器 -->
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- 增强功能，设置哪些方法切入事务【开始事务、提交事务、回滚事务、关闭连接还给连接池】   【xml设置的】 -->
+	<!-- <tx:advice id="txAdvice" transaction-manager="txManager">
+		<tx:attributes>
+			<tx:method name="add*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+			<tx:method name="update*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+			<tx:method name="delete*" propagation="REQUIRED" rollback-for="java.lang.Exception"/>
+			<tx:method name="query*" propagation="REQUIRED" read-only="true"/>
+			<tx:method name="get*" propagation="REQUIRED" read-only="true"/>
+		</tx:attributes>
+	</tx:advice> -->
+	
+	<!-- aop切面，配置哪些包的哪些类的哪些方法切入事务 -->
+	<!--
+	<aop:config>
+		<aop:pointcut expression="execution(* com.icss.hr.*.service.*.*(..))" id="pointcut"/>
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="pointcut"/>
+	</aop:config> -->
+	
+	<!-- 事务注解支持,需要在要切入事务的类中加入@Transactional注解 -->
+	<tx:annotation-driven transaction-manager="txManager"/>
+
+</beans>

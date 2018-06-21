@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+
+	
+	<!-- 检查入职日期的作业类 -->
+	<bean id="jobDetail_1" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<!-- 注入业务Bean -->
+		<property name="targetObject" ref="birthdayService"/>
+		<!--注入业务方法名称-->
+		<property name="targetMethod" value="checkBirthday"/>		
+	</bean>
+	
+	<!-- 复杂触发器，需要用克朗表达式设置日期时间 -->
+	<bean id="trigger_1" class="org.springframework.scheduling.quartz.CronTriggerBean">	
+		<!-- 注入jobDetail -->	
+		<property name="jobDetail" ref="jobDetail_1"/>
+		<!--设置cron表达式 -->
+		<property name="cronExpression" value="0 0 8 * * ?"/>	
+	</bean>
+	
+	<!-- 调度 -->
+	<bean id="testScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<!-- 注入触发器(多个) -->
+		<property name="triggers">
+			<list>
+				<ref bean="trigger_1"/>				
+			</list>
+		</property>
+	</bean>
+	
+</beans>
