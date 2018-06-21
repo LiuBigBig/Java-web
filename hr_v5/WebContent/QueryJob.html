@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!--设置视口,只在移动端生效,设置视口宽度=当前手机设备宽度，默认缩放1，用户不允许手动缩放-->
+		<meta name="viewport" content="width=width-device,initial-scale=1.0,user-scalable=no"/>
+		<meta charset="UTF-8">
+		<title></title>
+		<!--引入BootStrap的核心css--> 
+		<link rel="stylesheet" href="js/bootstrap/css/bootstrap.css" />
+	</head>
+	<body>				
+		<div class="container">
+			
+			<ol class="breadcrumb">
+				<li><a href="#">人力资源管理系统</a></li>
+				<li><a href="#">职务管理</a></li>				
+				<li>查询职务数据</li>
+			</ol>
+			
+			<h2 class="page-header">职务数据列表</h2>
+			
+			<table id="dataTable" class="table table-bordered table-striped">
+				<thead>
+					<tr>
+						<th>职务编号</th>
+						<th>职务名称</th>
+						<th>最低工资</th>
+						<th>最高工资</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr v-for="(job,index) in jobData">
+						<td>{{job.jobId}}</td>
+						<td>{{job.jobName}}</td>
+						<td>{{job.jobMinSal}}</td>
+						<td>{{job.jobMaxSal}}</td>
+						<td>
+							<input type="button" value="修改" class="btn btn-primary btn-sm update-btn" @click="toUpdate(job.jobId);"/>
+							<input type="button" value="删除" class="btn btn-danger btn-sm del-btn" @click="del(job.jobId,index);"/>
+						</td>						
+					</tr>
+				</tbody>
+			</table>
+			
+			<div class="row">
+				<div class="col-sm-offset-8 col-sm-4">
+					<a href="AddJob.html" class="btn btn-success btn-block">增加新职务</a>
+				</div>
+			</div>			
+			
+		</div>
+		
+		<!--引入jquery-->
+		<script type="text/javascript" src="js/jquery.js" ></script>
+		<!--引入全局js-->
+		<script type="text/javascript" src="js/global.js" ></script>
+		<!--引入jquery.js,实现js功能-->
+		<script type="text/javascript" src="js/bootstrap/js/bootstrap.js" ></script>
+		<!--引入layer层-->
+		<script type="text/javascript" src="js/layer/layer.js" ></script>
+		<!--引入vuejs-->
+		<script src="js/vue/vue2.5.js"></script>
+		<script src="js/vue/vue-resource.js"></script>
+		
+		<script type="text/javascript">
+		
+			window.onload = function() {
+				
+				var v = new Vue({
+					el:'.container', //应用vue数据的区域元素
+					data:{ //数据
+						jobData:null
+					},
+					methods:{ 
+						//查询数据方法
+						query:function() {
+							
+							$.getJSON(baseUrl + '/job/query',function(data) {
+								
+								v.jobData = data;
+								
+							});
+							
+						},
+						//删除数据方法
+						del:function(jobId,index) {
+							
+							if ( !window.confirm('确定要删除此职务吗') ) {
+								return;
+							}			
+							
+							//调用后端删除功能
+						    $.get(baseUrl + '/job/delete',{jobId:jobId},function() {
+						    	layer.msg('删除职务成功！');
+						    	
+						    	//删除数据模型中对应的元素
+								v.jobData.splice(index,1);
+						    })
+						    .error(function(xhr,errorStatue,errorText){
+								layer.msg('请求失败，' + errorText);
+							});
+														
+						},
+						//跳转到修改页
+						toUpdate:function(jobId) {
+							location.href='UpdateJob.html?jobId=' + jobId;
+						}
+					}
+				});
+				
+				//调用查询数据的方法
+				v.query();				
+			}				
+		</script>
+	</body>
+</html>

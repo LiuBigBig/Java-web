@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!--设置视口,只在移动端生效,设置视口宽度=当前手机设备宽度，默认缩放1，用户不允许手动缩放-->
+		<meta name="viewport" content="width=width-device,initial-scale=1.0,user-scalable=no"/>
+		<meta charset="UTF-8">
+		<title></title>
+		<!--引入BootStrap的核心css--> 
+		<link rel="stylesheet" href="js/bootstrap/css/bootstrap.css" />
+		
+		<style>
+			.pagination {
+				margin-top: 0!important;				
+			}
+		</style>
+	</head>
+	<body>				
+		<div class="container">
+			
+			<ol class="breadcrumb">
+				<li><a href="#">人力资源管理系统</a></li>
+				<li><a href="#">员工管理</a></li>				
+				<li>查询员工数据</li>
+			</ol>
+			
+			<h2 class="page-header">员工数据列表</h2>
+			
+			<table id="dataTable" class="table table-bordered table-striped">
+				<thead>
+					<tr>
+						<th>员工编号</th>
+						<th>员工姓名</th>
+						<th>邮箱</th>
+						<th>电话</th>
+						<th>部门</th>
+						<th>职务</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr v-for="(emp,index) in empData">
+						<td>{{emp.empId}}</td>
+						<td>{{emp.empName}}</td>
+						<td>{{emp.empEmail}}</td>
+						<td>{{emp.empPhone}}</td>
+						<td>{{emp.dept.deptName}}</td>
+						<td>{{emp.job.jobName}}</td>						
+						<td>							
+							<input type="button" value="修改" class="btn btn-primary btn-sm update-btn" @click="toUpdate(emp.empId);"/>
+							<input type="button" value="删除" class="btn btn-danger btn-sm del-btn" @click="del(emp.empId,index);"/>
+							<input type="button" value="详情" class="btn btn-success btn-sm del-btn" @click="show(emp.empId,index);"/>
+						</td>						
+					</tr>
+				</tbody>
+			</table>
+			
+			<!--分页工具条-->
+			<div class="row">
+				<div class="col-sm-4">
+					<div>
+						共{{pager.recordCount}}条数据，{{pager.pageNum}}/{{pager.pageCount}}页
+					</div>
+				</div>
+				<div class="col-sm-8">
+					<nav>
+			        	<ul class="pagination pull-right">
+			        		<li><a href="javascript:void(0);" @click="query(1);" v-show="pager.pageNum!=1">首页</a></li>
+			        		<li><a href="javascript:void(0);" @click="query(pager.pageNum-1);" v-show="pager.pageNum!=1">上页</a></li>
+			                
+			                <li v-for="i in pageBtns" :class="{active:i==pager.pageNum}"><a href="javascript:void(0);" @click="query(i);">{{i}}</a></li>
+			                
+			                <li><a href="javascript:void(0);" @click="query(pager.pageNum+1);" v-show="pager.pageNum!=pager.pageCount">下页</a></li>
+			                <li><a href="javascript:void(0);" @click="query(pager.pageCount);" v-show="pager.pageNum!=pager.pageCount">末页</a></li>
+			        	</ul>
+			        </nav>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="col-sm-offset-8 col-sm-4">
+					<a href="AddEmp.html" class="btn btn-success btn-block">增加新员工</a>
+				</div>
+			</div>			
+			
+		</div>
+		
+		<!--引入jquery-->
+		<script type="text/javascript" src="js/jquery.js" ></script>
+		<!--引入全局js-->
+		<script type="text/javascript" src="js/global.js" ></script>
+		<!--引入jquery.js,实现js功能-->
+		<script type="text/javascript" src="js/bootstrap/js/bootstrap.js" ></script>
+		<!--引入layer层-->
+		<script type="text/javascript" src="js/layer/layer.js" ></script>
+		<!--引入vuejs-->
+		<script src="js/vue/vue2.5.js"></script>
+		<script src="js/vue/vue-resource.js"></script>
+		
+		<script type="text/javascript">
+		
+			window.onload = function() {
+				
+				var v = new Vue({
+					el:'.container', //应用vue数据的区域元素
+					data:{ //数据
+						empData:[], //员工数据
+						pager:{}, //分页数据
+						pageBtns:[], //分页按钮组
+					},
+					methods:{ 
+						//查询数据方法
+						query:function(pageNum) {
+							
+							$.getJSON(baseUrl + '/emp/query',{pageNum:pageNum,pageSize:8},function(data) {
+								
+								//响应结果赋给vue数据模型变量
+								v.empData = data.list;
+								v.pager = data.pager;
+								
+								//生成分页页码
+								var start = v.pager.pageNum - 2;
+								var end = v.pager.pageNum + 2;
+								
+								if (v.pager.pageNum < 3) {
+									start = 1;
+									end = 5;
+								}
+								
+								if (end > v.pager.pageCount) {
+									end = v.pager.pageCount;
+								}
+								
+								v.pageBtns = [];
+								
+								for (var i = start;i <= end;i ++) {
+									v.pageBtns.push(i);
+								}								
+								
+							});
+							
+						},
+						//删除员工
+						del:function(empId,index) {
+							
+							var flag = window.confirm('确定要删除此员工吗');
+							
+							if (flag) {
+								
+								$.post(baseUrl + '/emp/delete',{empId:empId},function() {
+									
+									layer.msg('删除员工成功');
+									
+									v.empData.splice(index,1);//删除对应的vue中的数据
+									
+								})
+								.error(function(xhr,errorStatus,errorText){
+									layer.msg('请求失败,' + errorText);
+								});
+																
+							}
+							
+						},
+						//修改员工
+						toUpdate:function(empId) {
+							location.href = 'UpdateEmp.html?empId=' + empId;
+						},
+						//员工详情
+						show:function(empId,index) {
+							
+							layer.open({
+								title:'员工详情',
+								type:2, //2表示用iframe打开网页
+								area:['600px','700px'],
+								content:'UpdateEmpModal.html?empId=' + empId + '&index=' + index
+							});
+							
+						}						
+					}
+				});
+				
+				//调用查询数据的方法
+				v.query(1);	
+				
+				//对外暴露v对象
+				window.v = v;
+			}				
+		</script>
+	</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!--设置视口,只在移动端生效,设置视口宽度=当前手机设备宽度，默认缩放1，用户不允许手动缩放-->
+		<meta name="viewport" content="width=width-device,initial-scale=1.0,user-scalable=no"/>
+		<meta charset="UTF-8">
+		<title></title>
+		<!--引入BootStrap的核心css--> 
+		<link rel="stylesheet" href="js/bootstrap/css/bootstrap.css" />
+		
+		<style>
+			.pagination {
+				margin-top: 0!important;				
+			}
+		</style>
+	</head>
+	<body>				
+		<div class="container">
+			
+			<ol class="breadcrumb">
+				<li><a href="#">人力资源管理系统</a></li>
+				<li><a href="#">员工管理</a></li>				
+				<li>检索员工数据</li>
+			</ol>
+			
+			<h2 class="page-header">员工数据列表</h2>
+			
+			<div class="row" style="margin-bottom: 20px">
+				<div class="col-sm-8">
+					<form class="form-inline">
+						<div class="form-group">
+							<label>部门</label>
+							<select name="deptId" id="deptId" class="form-control">
+								<option>全部</option>
+							</select>
+						</div>	
+						<div class="form-group">
+							<label>职务</label>
+							<select name="jobId" id="jobId" class="form-control">
+								<option>全部</option>
+							</select>
+						</div>
+						<div class="form-group">
+							<label>姓名</label>
+							<input type="text" id="empName" name="empName" class="form-control" placeholder="请输入姓名关键字" />
+						</div>
+						<div class="form-group">
+							<input type="button" value="搜索员工" class="btn btn-primary" id="searchBtn"/>
+						</div>
+					</form>
+				</div>
+				<div class="col-sm-4">
+					<a href="SearchEmpByIndex.html" class="btn btn-info">切换到全文检索</a>
+				</div>
+			</div>
+			
+			<table id="dataTable" class="table table-bordered table-striped">
+				<thead>
+					<tr>
+						<th>员工编号</th>
+						<th>员工姓名</th>
+						<th>邮箱</th>
+						<th>电话</th>
+						<th>部门</th>
+						<th>职务</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr v-for="(emp,index) in empData">
+						<td>{{emp.empId}}</td>
+						<td>{{emp.empName}}</td>
+						<td>{{emp.empEmail}}</td>
+						<td>{{emp.empPhone}}</td>
+						<td>{{emp.dept.deptName}}</td>
+						<td>{{emp.job.jobName}}</td>						
+						<td>							
+							<input type="button" value="修改" class="btn btn-primary btn-sm update-btn" @click="toUpdate(emp.empId);"/>
+							<input type="button" value="删除" class="btn btn-danger btn-sm del-btn" @click="del(emp.empId,index);"/>
+							<input type="button" value="详情" class="btn btn-success btn-sm del-btn" @click="show(emp.empId,index);"/>
+						</td>						
+					</tr>
+				</tbody>
+			</table>
+			
+			<!--未找到符合条件的数据信息提示-->
+			<div class="row" id="alert" style="display: none;">
+				<div class="col-sm-12">
+					<div class="alert alert-info">
+						未找到符合条件的员工
+					</div>
+				</div>
+			</div>
+			
+			<!--分页工具条-->
+			<div class="row">
+				<div class="col-sm-4">
+					<div>
+						共{{pager.recordCount}}条数据，{{pager.pageNum}}/{{pager.pageCount}}页
+					</div>
+				</div>
+				<div class="col-sm-8">
+					<nav>
+			        	<ul class="pagination pull-right">
+			        		<li><a href="javascript:void(0);" @click="query(1);" v-show="pager.pageNum!=1 && pager.pageNum!=0">首页</a></li>
+			        		<li><a href="javascript:void(0);" @click="query(pager.pageNum-1);" v-show="pager.pageNum!=1 && pager.pageNum!=0">上页</a></li>
+			                
+			                <li v-for="i in pageBtns" :class="{active:i==pager.pageNum}"><a href="javascript:void(0);" @click="query(i);">{{i}}</a></li>
+			                
+			                <li><a href="javascript:void(0);" @click="query(pager.pageNum+1);" v-show="pager.pageNum!=pager.pageCount">下页</a></li>
+			                <li><a href="javascript:void(0);" @click="query(pager.pageCount);" v-show="pager.pageNum!=pager.pageCount">末页</a></li>
+			        	</ul>
+			        </nav>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="col-sm-offset-4 col-sm-4">
+					<input type="button" value="导出excel" id="exportBtn" class="btn btn-info btn-block" />
+				</div>
+				
+				<div class="col-sm-4">
+					<a href="AddEmp.html" class="btn btn-success btn-block">增加新员工</a>
+				</div>
+			</div>			
+			
+		</div>
+		
+		<!--引入jquery-->
+		<script type="text/javascript" src="js/jquery.js" ></script>
+		<!--引入全局js-->
+		<script type="text/javascript" src="js/global.js" ></script>
+		<!--引入jquery.js,实现js功能-->
+		<script type="text/javascript" src="js/bootstrap/js/bootstrap.js" ></script>
+		<!--引入layer层-->
+		<script type="text/javascript" src="js/layer/layer.js" ></script>
+		<!--引入vuejs-->
+		<script src="js/vue/vue2.5.js"></script>
+		<script src="js/vue/vue-resource.js"></script>
+		
+		<script type="text/javascript">
+		
+			window.onload = function() {
+				
+				//条件检索值
+				var deptIdCond = '';
+				var jobIdCond = '';
+				var empNameCond = '';
+								
+				//动态生成部门列表
+				$.getJSON(baseUrl + '/dept/query',function(data){
+					
+					var deptId = $('#deptId');
+					
+					$.each(data, function(index,item) {						
+						var opt = '<option value="' + item.deptId + '">' + item.deptName + '</option>';
+						deptId.append(opt);						
+					});
+					
+				})
+				.error(function(xhr,status,text){
+					layer.msg('请求失败，' + text);
+				});	
+				
+				//动态生成职务列表
+				$.getJSON(baseUrl + '/job/query',function(data){
+					
+					var jobId = $('#jobId');
+					
+					$.each(data, function(index,item) {						
+						var opt = '<option value="' + item.jobId + '">' + item.jobName + '</option>';
+						jobId.append(opt);						
+					});
+					
+				})
+				.error(function(xhr,status,text){
+					layer.msg('请求失败，' + text);
+				});								
+				
+				
+				var v = new Vue({
+					el:'.container', //应用vue数据的区域元素
+					data:{ //数据
+						empData:[], //员工数据
+						pager:{}, //分页数据
+						pageBtns:[], //分页按钮组
+					},
+					methods:{ 
+						//查询数据方法
+						query:function(pageNum) {
+							
+							//请求参数
+							var param = {
+								pageNum:pageNum,
+								pageSize:8,
+								deptId:deptIdCond,
+								jobId:jobIdCond,
+								empName:empNameCond
+							}
+							
+							$.getJSON(baseUrl + '/emp/queryByCondition',param,function(data) {
+								
+																
+								//响应结果赋给vue数据模型变量
+								v.empData = data.list;
+								v.pager = data.pager;
+																
+								//生成分页页码
+								var start = v.pager.pageNum - 2;
+								var end = v.pager.pageNum + 2;
+								
+								if (v.pager.pageNum < 3) {
+									start = 1;
+									end = 5;
+								}
+								
+								if (end > v.pager.pageCount) {
+									end = v.pager.pageCount;
+								}
+								
+								v.pageBtns = [];
+								
+								for (var i = start;i <= end;i ++) {
+									v.pageBtns.push(i);
+								}	
+								
+								//动态显示警告框
+								if (v.pager.recordCount == 0) {
+									$('#alert').show();
+								} else {
+									$('#alert').hide();
+								}
+								
+							});
+							
+						},
+						//删除员工
+						del:function(empId,index) {
+							
+							var flag = window.confirm('确定要删除此员工吗');
+							
+							if (flag) {
+								
+								$.post(baseUrl + '/emp/delete',{empId:empId},function() {
+									
+									layer.msg('删除员工成功');
+									
+									v.empData.splice(index,1);//删除对应的vue中的数据
+									
+								})
+								.error(function(xhr,errorStatus,errorText){
+									layer.msg('请求失败,' + errorText);
+								});
+																
+							}
+							
+						},
+						//修改员工
+						toUpdate:function(empId) {
+							location.href = 'UpdateEmp.html?empId=' + empId;
+						},
+						//员工详情
+						show:function(empId,index) {
+							
+							layer.open({
+								title:'员工详情',
+								type:2, //2表示用iframe打开网页
+								area:['600px','700px'],
+								content:'UpdateEmpModal.html?empId=' + empId + '&index=' + index
+							});
+							
+						}						
+					}
+				});
+				
+				//调用查询数据的方法
+				v.query(1);	
+				
+				//对外暴露v对象
+				window.v = v;
+				
+				//搜索按钮单击事件
+				$('#searchBtn').click(function() {
+					
+					//设置条件值
+					deptIdCond = $('#deptId').val();
+					jobIdCond = $('#jobId').val();
+					empNameCond = $('#empName').val();
+					
+					//调用查询数据方法
+					v.query(1);					
+				});
+				
+				//导出excel报表
+				$('#exportBtn').click(function() {
+					
+					location.href = baseUrl + '/emp/export?deptId=' + deptIdCond + '&jobId' + jobIdCond + '&empName=' + empNameCond;
+					
+				});
+				
+			}				
+		</script>
+	</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!--设置视口,只在移动端生效,设置视口宽度=当前手机设备宽度，默认缩放1，用户不允许手动缩放-->
+		<meta name="viewport" content="width=width-device,initial-scale=1.0,user-scalable=no"/>
+		<meta charset="UTF-8">
+		<title></title>
+		<!--引入BootStrap的核心css--> 
+		<link rel="stylesheet" href="js/bootstrap/css/bootstrap.css" />
+		
+		<style>
+			.img-list img {
+				border: none;
+				width: 200px;
+			}
+			
+			.img-list .item {
+				position: absolute;
+				padding: 10px;
+				background: #eeeeee;
+				margin: 5px;
+			}
+			
+			.img-list .item p {
+				font-size: 12px;
+				letter-spacing: 1px;
+				color: #333333;
+				width: 200px;
+				white-space: normal;
+				line-height: 20px;
+			}
+			
+			.item .btns {
+				display: none;
+			}
+			
+			.item:hover .btns {
+				display: block;
+			}
+		</style>
+	</head>
+	<body>				
+		<div class="container">
+			
+			<ol class="breadcrumb">
+				<li><a href="#">人力资源管理系统</a></li>
+				<li><a href="#">公司图库</a></li>				
+				<li>图片展示</li>
+			</ol>
+			
+			<h2 class="page-header">图片展示列表</h2>
+									
+			<div class="row">
+				<div class="col-sm-offset-8 col-sm-4">					
+					<input id="uploadBtn" value="上传照片" type="button" class="btn btn-success btn-block"/>					
+				</div>
+			</div>
+			
+			<div class="row img-list">
+				<div class="item" v-for="(pic,index) in picData">
+					<a v-bind:href="'ShowImg.html?picId=' + pic.picId" target="_blank">
+						<img v-bind:src="baseUrl + '/pic/get?picId=' + pic.picId "/>
+					</a>
+					<p>{{pic.picInfo}}</p>
+					<div class="row btns">
+						<input type="button" value="删除" class="btn btn-danger btn-xs col-xs-6" 
+							@click="del(pic.picId,index);"/>
+						<input type="button" value="下载" class="btn btn-warning btn-xs col-xs-6"
+							@click="download(pic.picId);"/>
+					</div>
+				</div>
+			</div>		
+			
+			<div class="row">
+				<input id="loadBtn" type="button" value="加载更多" class="btn btn-success btn-block"/>
+			</div>
+			
+		</div>
+		
+		<!--引入jquery-->
+		<script type="text/javascript" src="js/jquery.js" ></script>
+		<!--引入全局js-->
+		<script type="text/javascript" src="js/global.js" ></script>
+		<!--引入jquery.js,实现js功能-->
+		<script type="text/javascript" src="js/bootstrap/js/bootstrap.js" ></script>
+		<!--引入layer层-->
+		<script type="text/javascript" src="js/layer/layer.js" ></script>
+		<!--引入vuejs-->
+		<script src="js/vue/vue2.5.js"></script>
+		<script src="js/vue/vue-resource.js"></script>
+		<!--引入瀑布流图片插件-->
+		<script src="js/masonry/jquery.masonry.js"></script>
+		
+		<script type="text/javascript">
+		
+			//统一设置当前网页ajax全都是同步请求
+			$.ajaxSetup({
+				async:false
+			});
+		
+			window.onload = function() {
+				
+				var v = new Vue({
+					el:'.container', //应用vue数据的区域元素
+					data:{ //数据
+						picData:[],
+						pager:{},
+						baseUrl:baseUrl
+					},
+					methods:{ 
+						//查询数据方法
+						query:function(pageNum) {
+							
+							$.getJSON(baseUrl + '/pic/query',{pageNum:pageNum ,pageSize:10},function(data) {
+								
+								$.each(data.list, function(index,item) {
+									v.picData.push(item);
+								});								
+								
+								v.pager = data.pager;																
+												
+							    setTimeout(function() {
+							    	//生成瀑布流布局
+									var $container = $('.img-list');
+							    			    			    								    	
+							    	$container.imagesLoaded(function() {
+							    				    	
+								        $container.masonry({
+								            itemSelector: '.item',
+								            columnWidth: 5 //每两列之间的间隙为5像素
+								        });
+								        
+								    });	
+								    
+								    //一定要重新加载瀑布流
+								    $container.masonry('reload'); 
+								    
+								    //判断当前页码是否是最后一页
+								    if (pageNum == v.pager.pageCount) {
+								    	$('#loadBtn').prop('disabled',true);
+								    	$('#loadBtn').val('没有更多图片了');
+								    }
+							    	
+							    },300);
+							});
+							
+						},
+						//删除方法
+						del:function(picId,index) {
+							
+							$.get(baseUrl + '/pic/delete',{picId:picId},function() {
+								layer.msg('删除图片成功');									
+								//删除前端数据模型中的对应的数据
+								v.picData.splice(index,1);
+								//一定要重新加载瀑布流
+								var $container = $('.img-list');
+								$container.masonry('reload');
+							})
+							.error(function(){
+								layer.msg('请求失败');
+							});
+							
+						},
+						//下载图片方法
+						download:function(picId) {
+							
+							location.href = baseUrl + '/pic/download?picId='+picId;
+							
+						}
+					}
+				});
+				
+				//调用查询数据的方法
+				v.query(1);	
+				
+				//单击上传图片按钮
+				$('#uploadBtn').click(function() {
+					
+					layer.open({
+						title:'上传图片',
+						type:2, //2表示用iframe打开网页
+						area:['600px','700px'],
+						content:'AddPic.html'
+					});					
+					
+				});
+				
+				//加载下一页数据
+				$('#loadBtn').click(function() {
+					
+					v.query( v.pager.pageNum + 1 );
+					
+				});					
+				
+			}	
+		</script>
+	</body>
+</html>

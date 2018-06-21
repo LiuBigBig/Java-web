@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!--设置视口，只在移动端浏览器下生效，设置视口宽度=当前手机设备宽度，默认缩放1，用户不允许手动缩放-->
+		<meta name="viewport" content="width=width-device,initial-scale=1.0,user-scalable=no"/>
+		<meta charset="UTF-8">
+		<title></title>
+		<!--引入bootstrap的核心css-->
+		<link rel="stylesheet" href="js/bootstrap/css/bootstrap.css" />
+	</head>
+	<body>
+		
+		<div class="container">
+			
+			<ol class="breadcrumb">
+				<li><a href="#">人力资源管理系统</a></li>
+				<li><a href="#">部门管理</a></li>				
+				<li>查询部门数据</li>
+			</ol>
+			
+			<h2 class="page-header">部门数据列表</h2>
+			
+			<table id="dataTable" class="table table-bordered table-striped">
+				<thead>
+					<tr>
+						<th>部门编号</th>
+						<th>部门名称</th>
+						<th>部门地址</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					<!--<tr>
+						<td>10</td>
+						<td>开发部</td>
+						<td>上海</td>
+						<td>
+							<input type="button" value="修改" class="btn btn-primary btn-sm update-btn" />
+							<input type="button" value="删除" class="btn btn-danger btn-sm del-btn" />
+						</td>
+					</tr>-->
+				</tbody>				
+			</table>
+			
+			<div class="row">
+				<div class="col-sm-offset-8 col-sm-4">
+					<a href="AddDept.html" class="btn btn-success btn-block">增加新部门</a>
+				</div>
+			</div>
+			
+		</div>
+		
+		<!--引入jquery-->
+		<script type="text/javascript" src="js/jquery.js" ></script>
+		<!--引入全局js-->
+		<script src="js/global.js"></script>
+		<!--引入bootstrap.js，实现js功能-->
+		<script type="text/javascript" src="js/bootstrap/js/bootstrap.js" ></script>
+		<!--引入layer层-->
+		<script src="js/layer/layer.js"></script>
+		
+		<script>
+			$(document).ready(function() {
+				
+				//loading层
+				layer.load();
+				
+				$.getJSON(baseUrl + '/dept/query',function(data) {
+					
+					//表格数据内容
+					var dataTable = $('#dataTable');
+					
+					var htmlStr = '';
+					
+					//遍历响应的数据集合
+					$.each(data,function(index,el) {
+																		
+						htmlStr = '';
+						htmlStr += '<tr>';
+						htmlStr += '	<td>' + el.deptId + '</td>';
+						htmlStr += '	<td>' + el.deptName + '</td>';
+						htmlStr += '	<td>' + el.deptLoc + '</td>';
+						htmlStr += '	<td>';
+						htmlStr += '		<a href="UpdateDept.html?deptId=' + el.deptId + '" class="btn btn-primary btn-sm update-btn">修改</a>';
+						htmlStr += '		<input type="button" data-id="' + el.deptId + '" value="删除" class="btn btn-danger btn-sm del-btn"/>';
+						htmlStr += '	</td>';
+						htmlStr += '</tr>';
+						
+						dataTable.append(htmlStr);												
+					});
+					
+					//关闭loading层
+					layer.closeAll();
+										
+				});
+				
+				//删除按钮单击事件处理
+				$('#dataTable').on('click','.del-btn',function(e) {
+					
+					var that = this;//事件源对象					
+					
+					// 确认框
+					layer.confirm('确定要删除此部门吗？', {
+					    btn: ['确定','取消'] //按钮
+					}, function(){						
+					    layer.closeAll();
+					    var deptId = $(that).attr('data-id');	
+					    
+					    //调用后端删除功能
+					    $.get(baseUrl + '/dept/delete',{deptId:deptId},function() {
+					    	layer.msg('删除部门成功！');
+					    	
+					    	//删除当前行
+					    	$(that).parents('tr').remove();
+					    })
+					    .error(function(xhr,errorStatue,errorText){
+							layer.msg('请求失败，' + errorText);
+						});
+					    					    
+					}, function(){
+					    
+					});		
+					
+				});
+				
+				
+			});			
+		</script>
+	</body>
+</html>

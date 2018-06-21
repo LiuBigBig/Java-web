@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!--设置视口,只在移动端生效,设置视口宽度=当前手机设备宽度，默认缩放1，用户不允许手动缩放-->
+		<meta name="viewport" content="width=width-device,initial-scale=1.0,user-scalable=no"/>
+		<meta charset="UTF-8">
+		<title></title>
+		<!--引入BootStrap的核心css--> 
+		<link rel="stylesheet" href="js/bootstrap/css/bootstrap.css" />
+		
+		<style>
+			.pagination {
+				margin-top: 0!important;				
+			}
+		</style>
+	</head>
+	<body>				
+		<div class="container">
+			
+			<ol class="breadcrumb">
+				<li><a href="#">人力资源管理系统</a></li>
+				<li><a href="#">员工管理</a></li>				
+				<li>全文检索员工</li>
+			</ol>
+			
+			<h2 class="page-header">全文检索员工数据</h2>
+			
+			<div class="row" style="margin-bottom: 20px">
+				<div class="col-sm-8">
+					<div class="input-group">
+						<input type="text" id="queryStr" name="queryStr" placeholder="输入员工姓名/电话/简介关键字"
+							class="form-control"/>
+						<span class="input-group-btn">
+							<input type="button" class="btn btn-primary" value="全文检索" id="searchBtn"/>
+						</span>						
+					</div>
+				</div>
+				<div class="col-sm-4">
+					<a href="SearchEmp.html" class="btn btn-info">切换到普通检索</a>
+				</div>
+			</div>
+			
+			<table id="dataTable" class="table table-bordered table-striped">
+				<thead>
+					<tr>
+						<th>员工编号</th>
+						<th>员工姓名</th>						
+						<th>电话</th>
+						<th>员工描述</th>						
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr v-for="(emp,index) in empData">
+						<td>{{emp.empId}}</td>
+						<td>{{emp.empName}}</td>						
+						<td>{{emp.empPhone}}</td>
+						<td><span v-html="emp.empInfo"></span></td>											
+						<td>	
+							<input type="button" value="删除" class="btn btn-danger btn-sm del-btn" @click="del(emp.empId,index);"/>
+							<input type="button" value="详情" class="btn btn-success btn-sm del-btn" @click="show(emp.empId,index);"/>
+						</td>						
+					</tr>
+				</tbody>
+			</table>
+			
+			<!--未找到符合条件的数据信息提示-->
+			<div class="row" id="alert" style="display: none;">
+				<div class="col-sm-12">
+					<div class="alert alert-info">
+						未找到符合条件的员工
+					</div>
+				</div>
+			</div>
+			
+			<!--分页工具条-->
+			<div class="row">
+				<div class="col-sm-4">
+					<div>
+						共{{recordCount}}条数据
+					</div>
+				</div>				
+			</div>					
+			
+		</div>
+		
+		<!--引入jquery-->
+		<script type="text/javascript" src="js/jquery.js" ></script>
+		<!--引入全局js-->
+		<script type="text/javascript" src="js/global.js" ></script>
+		<!--引入jquery.js,实现js功能-->
+		<script type="text/javascript" src="js/bootstrap/js/bootstrap.js" ></script>
+		<!--引入layer层-->
+		<script type="text/javascript" src="js/layer/layer.js" ></script>
+		<!--引入vuejs-->
+		<script src="js/vue/vue2.5.js"></script>
+		<script src="js/vue/vue-resource.js"></script>
+		
+		<script type="text/javascript">
+		
+			window.onload = function() {
+							
+				var v = new Vue({
+					el:'.container', //应用vue数据的区域元素
+					data:{ //数据
+						empData:[], //员工数据
+						recordCount:0 //总记录数
+					},
+					methods:{ 
+						//查询数据方法
+						query:function() {
+							
+							//请求参数
+							var param = {								
+								queryStr:$('#queryStr').val()
+							}
+							
+							$.getJSON(baseUrl + '/emp/queryByIndex',param,function(data) {
+																								
+								//响应结果赋给vue数据模型变量
+								v.empData = data.list;
+								v.recordCount = data.recordCount;
+																	
+								//动态显示警告框
+								if (v.recordCount == 0) {
+									$('#alert').show();
+								} else {
+									$('#alert').hide();
+								}
+								
+							});
+							
+						},
+						//删除员工
+						del:function(empId,index) {
+							
+							var flag = window.confirm('确定要删除此员工吗');
+							
+							if (flag) {
+								
+								$.post(baseUrl + '/emp/delete',{empId:empId},function() {
+									
+									layer.msg('删除员工成功');
+									
+									v.empData.splice(index,1);//删除对应的vue中的数据
+									
+								})
+								.error(function(xhr,errorStatus,errorText){
+									layer.msg('请求失败,' + errorText);
+								});
+																
+							}
+							
+						},						
+						//员工详情
+						show:function(empId,index) {
+							
+							layer.open({
+								title:'员工详情',
+								type:2, //2表示用iframe打开网页
+								area:['600px','700px'],
+								content:'UpdateEmpModal.html?empId=' + empId + '&index=' + index
+							});
+							
+						}						
+					}
+				});
+								
+				//对外暴露v对象
+				window.v = v;
+				
+				//搜索按钮单击事件
+				$('#searchBtn').click(function() {	
+					
+					if ( $('#queryStr').val() == '' ) {
+						layer.msg("搜索内容不能为空");
+						return;
+					}
+					
+					//调用查询数据方法
+					v.query();					
+				});
+				
+			}				
+		</script>
+	</body>
+</html>

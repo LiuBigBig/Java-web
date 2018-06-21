@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!--设置视口，只在移动端浏览器下生效，设置视口宽度=当前手机设备宽度，默认缩放1，用户不允许手动缩放-->
+		<meta name="viewport" content="width=width-device,initial-scale=1.0,user-scalable=no"/>
+		<meta charset="UTF-8">
+		<title></title>
+		<!--引入bootstrap的核心css-->
+		<link rel="stylesheet" href="js/bootstrap/css/bootstrap.css" />
+		<!--引入日历插件css-->
+		<link rel="stylesheet" href="js/datetimepicker/jquery.datetimepicker.css" />
+		
+	</head>
+	<body>
+		
+		<div class="container">
+						
+			<form id="form1" class="form-horizontal">
+				<div class="form-group">
+					<label for="" class="col-sm-2">员工姓名</label>
+					<div class="col-sm-8">
+						<input readonly type="text" id="empName" name="empName" placeholder="请输入员工姓名" class="form-control" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="" class="col-sm-2">登陆账号</label>
+					<div class="col-sm-8">
+						<input readonly type="text" id="empLoginName" name="empLoginName" placeholder="请输入登陆账号" class="form-control" />
+					</div>
+				</div>				
+				<div class="form-group">
+					<label for="" class="col-sm-2">电子邮件</label>
+					<div class="col-sm-8">
+						<input readonly type="text" id="empEmail" name="empEmail" placeholder="请输入电子邮件" class="form-control" />
+					</div>
+				</div>				
+				<div class="form-group">
+					<label for="" class="col-sm-2">电话号码</label>
+					<div class="col-sm-8">
+						<input type="text" id="empPhone" name="empPhone" placeholder="请输入电话号码" class="form-control" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="" class="col-sm-2">入职日期</label>
+					<div class="col-sm-8">
+						<input readonly type="text" id="empHiredate" name="empHiredate" placeholder="请选择入职日期" class="form-control"
+							style="cursor: pointer;background: #ffffff;" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="" class="col-sm-2">员工工资</label>
+					<div class="col-sm-8">
+						<input type="text" id="empSalary" name="empSalary" placeholder="请输入员工工资" class="form-control" />
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="" class="col-sm-2">部门</label>
+					<div class="col-sm-8">
+						<select name="dept.deptId" id="deptId" class="form-control">
+							<option value="">请选择</option>							
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="" class="col-sm-2">职务</label>
+					<div class="col-sm-8">
+						<select name="job.jobId" id="jobId" class="form-control">
+							<option value="">请选择</option>							
+						</select>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="" class="col-sm-2">员工简介</label>
+					<div class="col-sm-8">
+						<textarea id="empInfo" name="empInfo" placeholder="请输入员工简介" class="form-control">无</textarea>
+					</div>
+				</div>				
+				<div class="form-group">					
+					<div class="col-sm-offset-2 col-sm-8">
+						<input type="hidden" id="empId" name="empId"/>
+						<input type="button" value="修改员工" class="btn btn-success" id="updateBtn" />
+						<input type="button" value="取消" class="btn btn-danger" onclick="window.parent.layer.closeAll();" />
+					</div>
+				</div>
+			</form>
+			
+		</div>
+		
+		<!--引入jquery-->
+		<script type="text/javascript" src="js/jquery.js" ></script>
+		<!--引入全局js-->
+		<script src="js/global.js"></script>
+		<!--引入bootstrap.js，实现js功能-->
+		<script type="text/javascript" src="js/bootstrap/js/bootstrap.js" ></script>
+		<!--引入layer层-->
+		<script src="js/layer/layer.js"></script>
+		<!--引入日历插件js-->
+		<script src="js/datetimepicker/jquery.datetimepicker.js"></script>
+		<!--引入parma.js-->
+		<script src="js/param.js"></script>
+				
+		<script>
+			$(document).ready(function() {
+				
+				//统一设置当前网页ajax全都是同步请求
+				$.ajaxSetup({
+					async:false
+				});				
+								
+				//动态生成部门列表
+				$.getJSON(baseUrl + '/dept/query',function(data){
+					
+					var deptId = $('#deptId');
+					
+					$.each(data, function(index,item) {						
+						var opt = '<option value="' + item.deptId + '">' + item.deptName + '</option>';
+						deptId.append(opt);						
+					});
+					
+				})
+				.error(function(xhr,status,text){
+					layer.msg('请求失败，' + text);
+				});	
+				
+				//动态生成职务列表
+				$.getJSON(baseUrl + '/job/query',function(data){
+					
+					var jobId = $('#jobId');
+					
+					$.each(data, function(index,item) {						
+						var opt = '<option value="' + item.jobId + '">' + item.jobName + '</option>';
+						jobId.append(opt);						
+					});
+					
+				})
+				.error(function(xhr,status,text){
+					layer.msg('请求失败，' + text);
+				});
+				
+				//获得员工数据
+				var empId = $.getParam('empId');
+				var index = $.getParam('index');
+				
+				$.getJSON(baseUrl + '/emp/get',{empId:empId},function(data){
+					
+					$('#empId').val(data.empId);
+					$('#empName').val(data.empName);
+					$('#empLoginName').val(data.empLoginName);
+					$('#empEmail').val(data.empEmail);					
+					$('#empPhone').val(data.empPhone);
+					$('#empHiredate').val(data.empHiredate);
+					$('#empSalary').val(data.empSalary);
+					$('#deptId').val(data.dept.deptId);
+					$('#jobId').val(data.job.jobId);
+					$('#empInfo').val(data.empInfo);
+					
+				})
+				.error(function(xhr,status,text){
+					layer.msg('请求失败，' + text);
+				});
+								
+				
+				/**
+				 * 表单验证函数
+				 */
+				function checkForm() {
+					
+					//员工姓名
+					var empName = $('#empName');
+					
+					if (empName.val() == '' || empName.val().length > 10) {						
+						layer.msg('员工姓名不能为空，且最多10字符');
+						empName.focus();
+						return false;						
+					}
+					
+					//登陆名
+					var empLoginName = $('#empLoginName');
+					
+					if (empLoginName.val() == '' || empLoginName.val().length > 10) {
+						empLoginName.focus();
+						layer.msg('登录名不能为空，且最多10字符');
+						return false;
+					}					
+										
+					//邮箱
+					var empEmail = $('#empEmail');
+					
+					var r = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/;
+					
+					if (!r.test( empEmail.val() ) || empEmail.val().length > 30) {
+						layer.msg('邮箱格式不正确或者超过30字符');
+						empEmail.focus();
+						return false;
+					}
+					
+					//电话号码
+					var empPhone = $('#empPhone');
+					
+					r = /^1[345678]\d{9}$/;
+					
+					if (!r.test(empPhone.val())) {
+						layer.msg('手机号码格式不正确');
+						empPhone.focus();
+						return false;
+					}
+					
+					//入职日期
+					var empHiredate = $('#empHiredate');
+					
+					if (empHiredate.val() == '') {
+						layer.msg('请选择入职日期');
+						empHiredate.focus();
+						return false;
+					}
+					
+					//工资
+					var empSalary = $('#empSalary');
+					
+					r = /^(0|([1-9]\d{0,5}(\.\d{1,2})?))$/;
+					
+					if (!r.test(empSalary.val())) {
+						layer.msg('工资最多6位整数，2位小数');
+						empSalary.focus();
+						return false;
+					}
+					
+					//部门
+					var deptId = $('#deptId');
+					
+					if (deptId.val() == '') {
+						layer.msg('请选择一个部门');
+						deptId.focus();
+						return false;
+					}
+					
+					//职务
+					var jobId = $('#jobId');
+					
+					if (jobId.val() == '') {
+						layer.msg('请选择一个职务');
+						jobId.focus();
+						return false;
+					}
+					
+					//员工简介
+					var empInfo = $('#empInfo');
+					
+					if (empInfo.val() == '' || empInfo.val().length > 200) {
+						layer.msg('员工简介不能为空，且最多200字');
+						empInfo.focus();
+						return false;
+					}					
+					
+					return true;
+				}
+				
+				//单击修改按钮，提交表单数据
+				$('#updateBtn').click(function() {
+					
+					if (!checkForm())
+						return;
+						
+					var param = $('#form1').serialize();
+										
+					$.ajax({
+						url:baseUrl + '/emp/update',
+						type:'POST',
+						dataType:'text',
+						data:param,
+						async:true						
+					})
+					.done(function(data) {						
+						layer.msg('修改员工成功');
+						
+						//修改前端数据
+						var empData = window.parent.v.empData;
+						
+						empData[index].empId = empId;
+						empData[index].empName = $('#empName').val();
+						empData[index].empEmail = $('#empEmail').val();
+						empData[index].empPhone = $('#empPhone').val();
+						empData[index].dept.deptName = $('#deptId option:selected').text();
+						empData[index].job.jobName = $('#jobId  option:selected').text();
+												
+						setTimeout(function() {
+							//通过父窗口关闭当前模态层
+							window.parent.layer.closeAll();
+						},500);
+					})
+					.fail(function(xhr,errorStatus,errorText){
+						layer.msg('请求失败，' + errorText);
+					});
+					
+				});
+				
+				
+			});			
+		</script>
+	</body>
+</html>

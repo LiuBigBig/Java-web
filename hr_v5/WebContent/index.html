@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<!--设置视口，只在移动端浏览器下生效，设置视口宽度=当前手机设备宽度，默认缩放1，用户不允许手动缩放-->
+		<meta name="viewport" content="width=width-device,initial-scale=1.0,user-scalable=no"/>
+		<meta charset="UTF-8">
+		<title></title>
+		<!--引入bootstrap的核心css-->
+		<link rel="stylesheet" href="js/bootstrap/css/bootstrap.css" />
+		<link rel="stylesheet" href="js/swiper/swiper.min.css" />
+	</head>
+	<body>
+		
+		<div class="container">
+			
+			<ol class="breadcrumb">
+				<li><a href="#">人力资源管理系统</a></li>						
+				<li>主页</li>
+			</ol>					
+			
+			<div class="swiper-container col-xs-12">
+				<div class="swiper-wrapper">
+					<div class="swiper-slide">
+						<img src="images/lunbo_1.jpg" class="img-responsive" style="width: 100%;height: 250px"/>
+					</div>
+					<div class="swiper-slide">
+						<img src="images/lunbo_2.jpg" class="img-responsive" style="width: 100%;height: 250px"/>
+					</div>
+					<div class="swiper-slide">
+						<img src="images/lunbo_3.jpg" class="img-responsive" style="width: 100%;height: 250px"/>
+					</div>
+				</div>		
+				<!-- Add Pagination -->
+				<div class="swiper-pagination"></div>		
+				<!-- Add Arrows -->
+				<div class="swiper-button-next"></div>
+				<div class="swiper-button-prev"></div>
+			</div>
+			<!-- 空行 -->
+			<div id="kong" style="width:100%;height: 20px" class="col-xs-12">
+				
+			</div>
+			<!--显示地图的div-->
+			<div id="mapDiv" style="width:100%;height: 600px" class="col-xs-12">
+				
+			</div>
+			
+		</div>
+		
+		<!--引入jquery-->
+		<script type="text/javascript" src="js/jquery.js" ></script>
+		<!--引入全局js-->
+		<script src="js/global.js"></script>
+		<!--引入bootstrap.js，实现js功能-->
+		<script type="text/javascript" src="js/bootstrap/js/bootstrap.js" ></script>
+		<!--引入layer层-->
+		<script src="js/layer/layer.js"></script>
+		<!--引入轮播图js-->
+		<script src="js/swiper/swiper.min.js"></script>
+		<!--引用百度js-->
+		<script src="http://api.map.baidu.com/api?v=2.0&ak=Y4CNGoS7OKmF5LXsbTSkFxpEbvpK4pw7"></script>
+		
+		<script>
+			$(document).ready(function() {
+				
+				//轮播图
+				var mySwiper = new Swiper('.swiper-container',{
+					loop: true,
+					autoplay: 3000,
+					pagination: '.swiper-pagination',
+					nextButton: '.swiper-button-next',
+					prevButton: '.swiper-button-prev',
+					paginationClickable: true,
+					autoplayDisableOnInteraction: false
+				});
+								
+			});	
+			
+			/*
+			 * 百度地图
+			 */
+			function baiduMap(loc) {
+				
+				var longitude = 121.51174166666667;//经度
+				var latitude = 38.86032;//纬度
+				
+//				alert('定位成功，当前经纬度：' + longitude + ',' + latitude);
+				
+				//调用百度地图的API
+				var map = new BMap.Map('mapDiv'); //创建地图对象
+				var point = new BMap.Point(longitude,latitude);//坐标点对象
+				//中心点定位，没有这个不出地图
+				map.centerAndZoom(point,15);//根据坐标定位
+				
+				var marker = new BMap.Marker(point); //创建标记点
+				map.addOverlay(marker);//在地图上添加标记点
+				
+				//添加地图类型控件，默认在地图右上方
+				map.addControl(new BMap.MapTypeControl());
+				//地图平移缩放控件，PC端默认地图左上方，移动端提供缩放控件，默认在地图右下方
+				map.addControl(new BMap.NavigationControl());
+				//比例尺控件，默认在地图左下方，显示地图的比例关系
+				map.addControl(new BMap.ScaleControl());
+				//缩略地图控件，默认在地图右下方，是一个可折叠的缩略地图
+				map.addControl(new BMap.OverviewMapControl());
+				//定位控件，针对于移动端，默认在地图左下方
+				map.addControl(new BMap.GeolocationControl());
+				//开启滚轮缩放
+				map.enableScrollWheelZoom(true);
+				
+				
+				//延迟3秒钟进行坐标纠偏
+				setTimeout(function() {
+					var convertor = new BMap.Convertor(); //转换坐标类的对象
+					var pointArr = []; //坐标数组
+					pointArr.push(point); //加入一个坐标对象（可以加入多个坐标对象）
+					convertor.translate(pointArr,1,5,translateCallback);//转换坐标					
+				},3000);
+				
+				//转换完毕的回调函数，data就是转换后的数据
+				function translateCallback(data) {
+					
+					if (data.status == 0) { //0为转换成功
+						var marker = new BMap.Marker(data.points[0]); //创建标记点
+						map.addOverlay(marker);//在地图上添加标记点
+						
+						var label = new BMap.Label('公司所在地',{offset:new BMap.Size(20,-20)}); //创建文字标签
+						marker.setLabel(label); //添加标记的文字标签	
+						
+						map.centerAndZoom(data.points[0],15) ;//设置坐标中心点和缩放级别
+					}
+					
+				}
+				
+			}
+			
+			baiduMap();
+		</script>
+	</body>
+</html>
